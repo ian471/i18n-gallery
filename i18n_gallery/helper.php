@@ -71,7 +71,7 @@ function i18n_gallery_item($gallery, $pic) {
 
 function i18n_gallery_site_link() {
   global $SITEURL;
-  return (string) $SITEURL;
+  return (string) $SITEURL . "getsimple/"; // XXX - Installation-specific; not sure how to do this correctly.
 }
 
 function i18n_gallery_page_url() {

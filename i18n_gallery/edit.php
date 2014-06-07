@@ -1,4 +1,35 @@
 <?php
+
+function ckeditor($id) {
+	?>
+			var editor = CKEDITOR.replace( '<?php echo $id; ?>', {
+					skin : 'getsimple',
+					forcePasteAsPlainText : true,
+					language : 'en',
+					defaultLanguage : 'en',
+					entities : false,
+					uiColor : '#FFFFFF',
+					height: '600px',
+					baseHref : 'http://northlandwords.org/',
+					toolbar : 
+					['Bold', 'Italic', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'Link', 'Unlink', 'RemoveFormat', 'PasteText', 'Source', 'Maximize']
+					, format_tags:'p;h1;h2;h3', contentsCss:['/base.css','/getsimple/edit.css'],					
+					tabSpaces:10,
+					filebrowserBrowseUrl : 'filebrowser.php?type=all',
+					filebrowserImageBrowseUrl : 'filebrowser.php?type=images',
+					filebrowserWindowWidth : '730',
+					filebrowserWindowHeight : '500'
+			});
+/*			CKEDITOR.instances["post-content"].on("instanceReady", InstanceReadyEvent);
+				function InstanceReadyEvent() {
+					this.document.on("keyup", function () {
+							$('#editform').trigger('change');
+				  });
+				}
+*/
+	<?php
+}
+
 function i18n_gallery_from_request($languages) {
   $gallery = array('items' => array());
   $gallery['title'] = @$_POST['post-title'];
@@ -20,6 +51,7 @@ function i18n_gallery_from_request($languages) {
       'title' => @$_POST['post-item_'.$i.'_title'],
       'tags' => @$_POST['post-item_'.$i.'_tags'],
       'description' => @$_POST['post-item_'.$i.'_description'],
+      'href' => @$_POST['post-item_'.$i.'_href'],
       'longitude' => @$_POST['post-item_'.$i.'_longitude'],
       'latitude' => @$_POST['post-item_'.$i.'_latitude'],
       'size' => $ss['size'],
@@ -200,6 +232,7 @@ if (!@$gallery['type']) $gallery['type'] = @$settings['type'] ? $settings['type'
               <span style="float:left;width:80px;text-align:right"><?php i18n('i18n_gallery/SIZE'); ?></span> 
               <span style="clear:both;float:left;width:<?php echo 400-$w; ?>px"><?php i18n('i18n_gallery/TITLE'); ?></span>
               <span style="float:left;width:200px"><?php i18n('i18n_gallery/TAGS'); ?></span>
+              <span style="clear:both;float:left;width:<?php echo 400-$w; ?>px">Link location</span>
               <span style="clear:both;float:left;width:<?php echo 600-$w; ?>px"><?php i18n('i18n_gallery/DESCRIPTION'); ?></span>
             </th>
             <th></th>
@@ -239,13 +272,14 @@ if (!@$gallery['type']) $gallery['type'] = @$settings['type'] ? $settings['type'
               <input type="text" class="text lang lang_<?php echo $language; ?>" name="post-item_<?php echo $i; ?>_title_<?php echo $language; ?>" value="<?php echo htmlspecialchars(@$item['title_'.$language]); ?>" 
                 title="<?php echo htmlspecialchars(i18n_r('i18n_gallery/TITLE')); ?>" style="clear:both;float:left;width:<?php echo 383-$w; ?>px;margin-right:5px;display:none;"/>
 <?php } ?>
-              <input type="text" class="text" name="post-item_<?php echo $i; ?>_tags" value="<?php echo htmlspecialchars(@$item['tags']); ?>" 
-                title="<?php echo htmlspecialchars(i18n_r('i18n_gallery/TAGS')); ?>" style="float:left;width:188px"/>
-              <textarea class="text lang lang_" name="post-item_<?php echo $i; ?>_description" title="<?php echo htmlspecialchars(i18n_r('i18n_gallery/DESCRIPTION')); ?>" 
-                style="clear:both;float:left;width:<?php echo 588-$w; ?>px;height:14px;margin-top:2px;"><?php echo htmlspecialchars(@$item['description']); ?></textarea>
+              <input type="text" class="text" name="post-item_<?php echo $i; ?>_tags" value="<?php echo htmlspecialchars(@$item['tags']); ?>" style="float:left;width:188px"/>
+              <input type="text" class="text" name="post-item_<?php echo $i; ?>_href" value="<?php echo htmlspecialchars(@$item['href']); ?>" style="float:left;width:300px"/>
+              <textarea class="text lang lang_" name="post-item_<?php echo $i; ?>_description" style="clear:both;float:left;width:<?php echo 588-$w; ?>px;height:14px;margin-top:2px;"><?php echo htmlspecialchars(@$item['description']); ?></textarea>
 <?php if (count($languages) > 0) foreach ($languages as $language) { ?>
-              <textarea class="text lang lang_<?php echo $language; ?>" name="post-item_<?php echo $i; ?>_description_<?php echo $language; ?>" title="<?php echo htmlspecialchars(i18n_r('i18n_gallery/DESCRIPTION')); ?>" 
-                style="clear:both;float:left;width:<?php echo 588-$w; ?>px;height:14px;margin-top:2px;display:none;"><?php echo htmlspecialchars(@$item['description_'.$language]); ?></textarea>
+              <textarea class="text lang lang_<?php echo $language; ?>" name="post-item_<?php echo $i; ?>_description_<?php echo $language; ?>" id="description_<?php echo $i; ?>" style="clear:both;float:left;width:<?php echo 588-$w; ?>px;height:14px;margin-top:2px;display:none;"><?php echo htmlspecialchars(@$item['description_'.$language]); ?></textarea>
+			  <script type="text/javascript">
+			  <?php ckeditor("description_$i"); ?>
+			  </script>
 <?php } ?>
             </td>
 	          <td class="delete" >
@@ -298,9 +332,10 @@ if (!@$gallery['type']) $gallery['type'] = @$settings['type'] ? $settings['type'
         html += '<input type="text" class="text lang lang_<?php echo $language; ?>" name="post-item_'+i+'_title<?php echo $language ? '_'.$language : ''; ?>" value="" style="clear:both;float:left;width:<?php echo 383-$w; ?>px;margin-right:5px;display:none;"/>';
 <?php } ?>
         html += '<input type="text" class="text" name="post-item_'+i+'_tags" value="" style="float:left;width:188px"/>';
+        html += '<input type="text" class="text" name="post-item_'+i+'_href" value="" style="float:left;width:300px"/>';
         html += '<textarea class="text lang lang_" name="post-item_'+i+'_description" style="clear:both;float:left;width:<?php echo 588-$w; ?>px;margin-top:2px;height:14px;"></textarea>';
 <?php if (count($languages) > 0) foreach ($languages as $language) { ?>
-        html += '<textarea class="text lang lang_<?php echo $language; ?>" name="post-item_'+i+'_description<?php echo $language ? '_'.$language : ''; ?>" style="clear:both;float:left;width:<?php echo 588-$w; ?>px;margin-top:2px;height:14px;display:none;"></textarea>';
+        html += '<textarea class="text lang lang_<?php echo $language; ?>" name="post-item_'+i+'_description<?php echo $language ? '_'.$language : ''; ?>" id="description_'+i+'" style="clear:both;float:left;width:<?php echo 588-$w; ?>px;margin-top:2px;height:14px;display:none;"></textarea>';
 <?php } ?>
         html += '</td>\n';
 	      html += '<td class="delete"><a href="#" title="<?php i18n('i18n_gallery/DELETE_ITEM'); ?>">X</a></td>\n';
@@ -316,6 +351,7 @@ if (!@$gallery['type']) $gallery['type'] = @$settings['type'] ? $settings['type'
         if (description) $tr.find('[name$=description]').val(description);
         $tr.find('textarea').autogrow({ expandTolerance:1 });
         $tr.find('.delete a').click(deleteRow);
+		<?php ckeditor("description_'+i+'"); ?>
       }
       function deleteRow(e) {
         $(e.target).closest('tr').remove();
